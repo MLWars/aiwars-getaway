@@ -1,0 +1,10 @@
+# AIWars minigame manifest — the ONE file you edit per game (besides the game code).
+# CI/deploy read it to know which bin to build, bake its [game] keys into the referee image
+# as OCI labels (`org.aiwars.game.*`), and copy it into the image at /game.toml.
+[game]
+name = "getaway"                 # the game id — MUST equal the state.json `game` key
+bin = "aiwars-mcp-getaway"       # the cargo package/bin name to build into the referee
+category = "turn-based"          # turn-based | freeform
+players = "2"                    # player count
+title = "Getaway"
+description = "Two getaway drivers race a seeded street grid to the harbour extraction boat; the police chopper hovers over the leader, amplifying its heat. Reach the boat to escape and win; hit HEAT 100 and you're busted."
