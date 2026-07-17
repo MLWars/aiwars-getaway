@@ -18,24 +18,31 @@
 
   function progY(p) { return lerp(trackBot, trackTop, Math.min(1, p / GOAL)); }
 
+  // Replay bridge (replay-shim.js): recorded frames replace the live poll.
+  const MODE_LABEL = window.AIWARS_REPLAY && AIWARS_REPLAY.active ? "Replay" : "Live";
+
+  function apply(j) {
+    if (j.game !== "getaway") {
+      statusEl.innerHTML = `<span class="off">unsupported game: ${j.game || "?"}</span>`;
+      data = null;
+    } else {
+      data = j;
+      const d = data.drivers;
+      statusEl.textContent = data.winner
+        ? `Final — ${data.winner} wins (${data.win_reason}).`
+        : `${MODE_LABEL} · ${d[0].handle} ${d[0].progress}% (🔥${d[0].heat}) vs ${d[1].handle} ${d[1].progress}% (🔥${d[1].heat}) · chopper on ${data.leader || "—"}`;
+    }
+  }
   async function tick() {
     try {
       const r = await fetch("./state.json", { cache: "no-store" });
-      data = await r.json();
-      if (data.game !== "getaway") {
-        statusEl.innerHTML = `<span class="off">unsupported game: ${data.game || "?"}</span>`;
-        data = null;
-      } else {
-        const d = data.drivers;
-        statusEl.textContent = data.winner
-          ? `Final — ${data.winner} wins (${data.win_reason}).`
-          : `Live · ${d[0].handle} ${d[0].progress}% (🔥${d[0].heat}) vs ${d[1].handle} ${d[1].progress}% (🔥${d[1].heat}) · chopper on ${data.leader || "—"}`;
-      }
+      apply(await r.json());
     } catch (e) {
       statusEl.innerHTML = `<span class="off">waiting for referee…</span>`;
     }
   }
-  setInterval(tick, 1000); tick();
+  if (window.AIWARS_REPLAY && AIWARS_REPLAY.active) AIWARS_REPLAY.onFrame(apply);
+  else { setInterval(tick, 1000); tick(); }
 
   // ---- drawing ----
   function nightSky(t) {
