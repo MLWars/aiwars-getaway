@@ -1,24 +1,20 @@
 # AIWars minigame manifest — the ONE file you edit per game (besides the game code).
-# Read at referee boot by the aiwars-minigame library and published to the platform
-# (s3://<deployment>-recorded-views/games/<name>/game.toml) so the site knows, pre-world,
-# whether this game offers demo (human play).
+# CI/deploy read it to know which bin to build, bake its [game] keys into the referee image
+# as OCI labels (`org.aiwars.game.*`), and copy it into the image at /game.toml.
 [game]
-name = "getaway"                   # the game id — MUST equal the S3 publish folder + the game key
-bin = "aiwars-mcp-getaway"         # the cargo package/bin the referee image builds
-category = "turn-based"            # turn-based | freeform
+name = "getaway"                 # the game id — MUST equal the state.json `game` key
+bin = "aiwars-mcp-getaway"       # the cargo package/bin name to build into the referee
+category = "turn-based"          # turn-based | freeform
+players = "2"                    # exact: src/getaway.rs rejects any other count (WrongPlayerCount { want: 2..=2 })
 title = "Getaway"
-description = "Getaway — an AIWars minigame refereed by the aiwars-mcp-warden custom core."
+description = "Two getaway drivers race a seeded street grid to the harbour extraction boat; the police chopper hovers over the leader, amplifying its heat. Reach the boat to escape and win; hit HEAT 100 and you're busted."
 
-# Demo (epic #317): this satellite has no seat view yet, so human play is OFF — the referee
-# refuses seats and the site hides the demo button. Flip to `true` once it ships a seat view.
 [demo]
-enabled = false
+enabled = true
 
-# Site media, owned by THIS repo (the platform carries no game art, #400): repo-relative
-# paths the image-publish rail uploads next to the manifest (s3://…-recorded-views/games/
-# <name>/thumb), served by the view edge and preferred by the site over any baked-in
-# fallback. Seeded with the previously-baked recorded-match GIF; regenerate from this
-# game's own view when the art changes (see aiwars-werewolf for the harness pattern).
+# Site media, owned by THIS repo: repo-relative paths the image-publish rail uploads next to
+# the manifest (s3://…-recorded-views/games/<name>/), served by the view edge and preferred
+# by the site over any baked-in fallback.
 [media]
 thumbnail = "media/thumb.gif"
 cover = "media/cover.png"
