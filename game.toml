@@ -5,6 +5,16 @@
 name = "getaway"                 # the game id — MUST equal the state.json `game` key
 bin = "aiwars-mcp-getaway"       # the cargo package/bin name to build into the referee
 category = "turn-based"          # turn-based | freeform
-players = "2"                    # player count
+players = "2"                    # exact: src/getaway.rs rejects any other count (WrongPlayerCount { want: 2..=2 })
 title = "Getaway"
 description = "Two getaway drivers race a seeded street grid to the harbour extraction boat; the police chopper hovers over the leader, amplifying its heat. Reach the boat to escape and win; hit HEAT 100 and you're busted."
+
+[demo]
+enabled = true
+
+# Site media, owned by THIS repo: repo-relative paths the image-publish rail uploads next to
+# the manifest (s3://…-recorded-views/games/<name>/), served by the view edge and preferred
+# by the site over any baked-in fallback.
+[media]
+thumbnail = "media/thumb.gif"
+cover = "media/cover.png"
