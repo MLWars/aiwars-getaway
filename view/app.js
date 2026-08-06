@@ -28,9 +28,11 @@
     } else {
       data = j;
       const d = data.drivers;
+      // One short line: the site frames this view in a ~342px box, so the status
+      // strip fits ~50 characters before it ellipsises.
       statusEl.textContent = data.winner
-        ? `Final — ${data.winner} wins (${data.win_reason}).`
-        : `${MODE_LABEL} · ${d[0].handle} ${d[0].progress}% (🔥${d[0].heat}) vs ${d[1].handle} ${d[1].progress}% (🔥${d[1].heat}) · chopper on ${data.leader || "—"}`;
+        ? `Final · ${data.winner} wins (${data.win_reason})`
+        : `${MODE_LABEL} · ${d[0].handle} ${d[0].progress}% 🔥${d[0].heat} · ${d[1].handle} ${d[1].progress}% 🔥${d[1].heat}`;
     }
   }
   async function tick() {
@@ -123,9 +125,12 @@
   function hud() {
     if (!data) return;
     const d = data.drivers, rows = [[d[0], "#10b981", "#5eead4"], [d[1], "#8b5cf6", "#c4b5fd"]];
-    ctx.fillStyle = "rgba(8,14,26,.82)"; rrect(12, 108, 250, 70, 10); ctx.fill();
+    // Scoreboard sits in the top-left band, OFF the track: it ends at y 71, above
+    // trackTop (90) and above the roof of a car at the highest live progress
+    // (99% → y 94, roof 78), and left of the centred odds pill (x 266).
+    ctx.fillStyle = "rgba(8,14,26,.82)"; rrect(12, 7, 250, 64, 10); ctx.fill();
     rows.forEach(([dr, col, soft], i) => {
-      const y = 126 + i * 28;
+      const y = 25 + i * 28;
       label(24, y + 4, dr.handle.toUpperCase().slice(0, 12), 10, soft, "left");
       bar(110, y - 6, 90, 7, dr.progress / GOAL, col);
       const hk = Math.min(1, dr.heat / 100);
@@ -137,8 +142,8 @@
     const bw = 248, x = (W - bw) / 2, yy = 7;
     ctx.fillStyle = "rgba(7,11,20,.82)"; rrect(x, yy, bw, 30, 9); ctx.fill();
     label(W / 2, yy + 12, "◷ LIVE ODDS", 8, "#7C8AA0", "center");
-    label(x + 12, yy + 12, d[0].handle.toUpperCase() + " " + pa + "%", 9, "#5eead4", "left");
-    label(x + bw - 12, yy + 12, pb + "% " + d[1].handle.toUpperCase(), 9, "#c4b5fd", "right");
+    label(x + 12, yy + 12, d[0].handle.toUpperCase().slice(0, 9) + " " + pa + "%", 9, "#5eead4", "left");
+    label(x + bw - 12, yy + 12, pb + "% " + d[1].handle.toUpperCase().slice(0, 9), 9, "#c4b5fd", "right");
     const aw = Math.max(2, (bw - 24) * a);
     ctx.fillStyle = "#10b981"; rrect(x + 12, yy + 18, aw, 7, 3); ctx.fill();
     ctx.fillStyle = "#8b5cf6"; rrect(x + 12 + aw, yy + 18, bw - 24 - aw, 7, 3); ctx.fill();
@@ -169,9 +174,10 @@
       const lead = data.leader;
       const pos = [0, 1].map(i => ({ x: LANE_X[d[i].lane], y: d[i].escaped ? 64 : progY(shown[i]) }));
       const order = lead === d[0].handle ? [1, 0] : [0, 1];
+      hud();   // chrome first: cars and chopper paint OVER it if they ever meet
       for (const i of order) car(pos[i].x, pos[i].y, i ? "#8b5cf6" : "#10b981", d[i].handle, !data.winner, t, i ? "B" : "A");
       if (!data.winner && lead) { const li = d[0].handle === lead ? 0 : 1; chopper(pos[li].x, pos[li].y, t); }
-      hud(); finish();
+      finish();
     }
     requestAnimationFrame(frame);
   }
